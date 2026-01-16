@@ -1,20 +1,19 @@
 import pandas as pd
 
-from src.data_loader import synthetic_data
+from src.data_loader import load_activity_from_db
 from src.timeline_builder import user_timeline
 from src.decay_detector import detect_decay
 from src.risk_signal import generate_risk_signal
-    
+
 def final_result():
 
-    ## Step 1: Generate Synthetic Data
-    df = synthetic_data(total_users=70, total_weeks=12)
-    df.to_csv("data/raw/user_activity.csv", index=False)
+    ## Step 1: Load data from DB
+    df = load_activity_from_db()
 
-    ## Step 2: Build User Timelines
-    timelines = user_timeline("data/raw/user_activity.csv")
+    ## Step 2: Build timelines from DataFrame
+    timelines = user_timeline(df)
 
-    ## Step 3 and 4: Detect Decay and Generate Risk Signals
+    ## Step 3 & 4: Detect decay and generate risk
     results = []
 
     for user_id, timeline in timelines.items():
@@ -30,8 +29,7 @@ def final_result():
             "risk_level": risk_info["risk_level"]
         })
 
-    results_df = pd.DataFrame(results)
-    return results_df
+    return results
 
 
 ## Driver Code
