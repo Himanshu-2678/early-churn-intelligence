@@ -1,5 +1,7 @@
 ## to generate the synthetic data 
 import pandas as pd
+from sqlalchemy.orm import Session
+from src.db.database import engine
 import random
 
 def synthetic_data(total_users = 100, total_weeks = 12, seed = 42) -> pd.DataFrame:
@@ -29,6 +31,14 @@ def synthetic_data(total_users = 100, total_weeks = 12, seed = 42) -> pd.DataFra
 
     df = pd.DataFrame(data, columns=["user_id", "week", "sessions"])
     return df
+
+# Craeting a function to load data from the DataBase.
+def load_activity_from_db():
+    query = "select user_id, week, activity_score from user_events order by user_id, week;"
+
+    result = pd.read_sql(query, engine)
+    return result
+
 
 ## Driver Code
 if __name__ == "__main__":
