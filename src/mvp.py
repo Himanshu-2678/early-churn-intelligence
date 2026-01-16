@@ -34,7 +34,6 @@ def main():
     results_df = pd.DataFrame(results)
     results_df.to_csv("outputs/churn_risk.csv", index=False)
 
-    print("Results saved to 'outputs/churn_risk.csv")
 
 ## Driver Code
 if __name__ == "__main__":
