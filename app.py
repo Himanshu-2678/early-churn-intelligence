@@ -9,6 +9,7 @@ from src.db.session import get_db
 from src.db.models import User, UserEvent
 from pydantic import BaseModel
 from src.db.models import EarlyChurnPrediction
+from src.db.database import Base, engine
 
 app = FastAPI()
 
@@ -16,7 +17,12 @@ class TrackEventRequest(BaseModel):
     user_id: int
     week: int
     activity_score: float
+    
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
+    
 @app.get("/")
 async def root():  # what is async: It allows the function to run asynchronously, which means it can handle other tasks while waiting for I/O operations to complete.
     return {"message": "Welcome to the Early Churn Intelligence"}
@@ -29,31 +35,30 @@ async def health():
 
 @app.post("/run")
 def run_pipeline(db: Session = Depends(get_db)):
-    results = final_result()
+    user_results = final_result()
 
-    if not results:
+    if not user_results:
         return {"status" : "completed",
                 "user_id": 0,
                 "week": 0,
                 "activity_score": 0}
     
-    for r in results:
+    for r in user_results:
         predictions = EarlyChurnPrediction(user_id = r["user_id"], churn_probability = r["decay_score"], risk_level = r["risk_level"], is_decaying = r["is_decaying"])
         db.add(predictions)
     db.commit()
  
-    total_user_cnt = len(results)
-    high_risk_cnt = sum(1 for r in results if r['risk_level'] == 'high')
-    deacaying_user_cnt = sum(1 for r in results if r['is_decaying'])
+    total_user_cnt = len(user_results)
+    high_risk_cnt = sum(1 for r in user_results if r['risk_level'] == 'high')
+    deacaying_user_cnt = sum(1 for r in user_results if r['is_decaying'])
 
-    results = {
+    return {
         "status": "completed",
         "total_users": total_user_cnt,
         "high_risk_users": high_risk_cnt,
-        "decaying_users": deacaying_user_cnt
+        "decaying_users": deacaying_user_cnt,
+        "results": user_results
     }
-
-    return results
 
 
 @app.post("/debug/test-insert")
