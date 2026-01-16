@@ -1,5 +1,6 @@
 ## to generate the synthetic data 
 import pandas as pd
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from src.db.database import engine
 import random
@@ -29,15 +30,34 @@ def synthetic_data(total_users = 100, total_weeks = 12, seed = 42) -> pd.DataFra
             sessions = max(0, int(sessions))  
             data.append([user_id, week, sessions])
 
-    df = pd.DataFrame(data, columns=["user_id", "week", "sessions"])
+    df = pd.DataFrame(data, columns=["user_id", "week", "activity_score"])
     return df
 
 # Craeting a function to load data from the DataBase.
 def load_activity_from_db():
-    query = "select user_id, week, activity_score from user_events order by user_id, week;"
+    try:
+        # Try reading from DB
+        query = """
+        SELECT user_id, week, sessions
+        FROM user_events
+        ORDER BY user_id, week;
+        """
+        return pd.read_sql(query, engine)
 
-    result = pd.read_sql(query, engine)
-    return result
+    except Exception as e:
+        print("DB empty or table missing. Generating synthetic data...")
+
+        # Generate synthetic data
+        df = synthetic_data()
+
+        # Save it to DB
+        df.to_sql(
+            "user_events",
+            engine,
+            if_exists="replace",
+            index=False)
+        
+        return df
 
 
 ## Driver Code
