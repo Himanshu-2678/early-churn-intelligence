@@ -22,7 +22,7 @@ class TrackEventRequest(BaseModel):
 def startup():
     Base.metadata.create_all(bind=engine)
 
-    
+
 @app.get("/")
 async def root():  # what is async: It allows the function to run asynchronously, which means it can handle other tasks while waiting for I/O operations to complete.
     return {"message": "Welcome to the Early Churn Intelligence"}
