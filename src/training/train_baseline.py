@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from row_filtering import filter_structurally_stable_rows
+
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -9,6 +11,9 @@ from sklearn.metrics import classification_report, confusion_matrix, roc_auc_sco
 def main():
     # loading data
     train = pd.read_csv("data/processed/train.csv")
+    train = filter_structurally_stable_rows(train)
+    print("Training rows after structural filtering:", len(train))
+
     val = pd.read_csv("data/processed/val.csv")
 
     # restore the date columns
@@ -46,6 +51,34 @@ def main():
 
     roc = roc_auc_score(y_val, val_probs)
     pr  = average_precision_score(y_val, val_probs) # pr: precision-recall
+
+    # --- Lift@Top10% ---
+    base_rate = y_val.mean()
+
+    df_eval = pd.DataFrame({
+        "y_true": y_val,
+        "y_score": val_probs
+    }).sort_values("y_score", ascending=False)
+
+    top_k = int(0.10 * len(df_eval))
+    top_10 = df_eval.iloc[:top_k]
+
+    top_10_rate = top_10["y_true"].mean()
+    lift_at_10 = top_10_rate / base_rate
+
+    print(f"Base churn rate: {base_rate:.4f}")
+    print(f"Top 10% churn rate: {top_10_rate:.4f}")
+    print(f"Lift@Top10%: {lift_at_10:.4f}")
+
+# attach predictions back to val dataframe
+    val = val.copy()
+    val["pred_proba"] = val_probs
+
+    # save enriched validation table
+    val.to_csv("data/processed/val_with_preds.csv", index=False)
+
+    print("Saved validation predictions to data/processed/val_with_preds.csv")
+
 
     print(f"ROC-AUC: {roc:.4f}")
     print(f"PR-AUC : {pr:.4f}")
