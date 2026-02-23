@@ -131,6 +131,30 @@ I then tested whether many rows represented states where churn was structurally 
 
 **Result:** Training data collapsed significantly, model performance degraded further, and Lift dropped close to random. This confirmed that the already weak signal was not localized to feasible churn windows.
 
+## Time-Aware Snapshot Design
+
+### Account × Month Backbone
+I constructed a monthly account × snapshot_date backbone.
+
+![Temporal Snapshot Logic](plots/Figure_1.png)
+
+* Each row represents the full system state of an account...
+...
+
+## Baseline Results
+
+Initial baseline (logistic regression) performance:
+* ROC-AUC ≈ 0.50
+* PR-AUC ≈ 0.15
+
+![Precision Recall Curve](plots/pr_curve.png)
+
+This indicated weak global separability and limited concentration of churners at the top of the risk ranking. Even with more complex models, the inability to push the PR curve upward confirmed that the features lacked the signal necessary to reliably identify high-risk accounts.
+
+![Feature Importance Plot](plots/feature_importance.png)
+
+
+After systematically exhausting all legitimate modeling levers... I concluded that churn decisions are driven by unobserved factors.
 ## Final Conclusion
 
 After systematically exhausting all legitimate modeling levers—lifecycle segmentation, event detection, account-relative normalization, structural feasibility filtering, and strict temporal validation—I concluded that churn decisions in this dataset are primarily driven by unobserved exogenous factors, such as:
