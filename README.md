@@ -164,9 +164,26 @@ After systematically exhausting all legitimate modeling levers—lifecycle segme
 
 These drivers are not observable in behavioral telemetry, which fundamentally limits predictability. This outcome reflects a data observability limitation, not a modeling failure.
 
+## Note on Model Performance and Final Conclusion
+
+During the later stage of this project, I retrained a baseline logistic regression model using a standard **70% train / 30% validation temporal split**, without applying additional structural filtering.
+
+With this setup:
+- ROC-AUC increased to ~0.61
+- PR-AUC increased to ~0.28 (base churn rate ~0.12)
+
+This improvement confirmed that the model was able to learn **coarse lifecycle signals**, such as account age and inactivity, especially for later-stage churn. In other words, churn becomes more separable when the model is allowed to use broader lifecycle hindsight.
+
+However, this result did **not change the original conclusion of the project**.
+
+When the problem was framed more realistically — focusing on early churn, strict leakage-safe windows, and intervention-ready settings — the predictive signal consistently weakened. This indicated that while churn can be detected retrospectively, it is much harder to predict **early enough to act on** using behavioral telemetry alone.
+
+I treated this increase in ROC as a validation of the data boundary rather than a reason to continue optimizing models. Pushing further would likely improve metrics marginally, but would not improve real-world actionability.
+
+For this reason, I consider this project complete and use it as a learning reference for problem framing, evaluation discipline, and knowing when to stop modeling.
 ## Why I Stopped Modeling
 
-Continuing beyond this point would have meant metric pushing, adding unjustified complexity, or masking weak signal with model tuning. Stopping was the correct engineering decision.
+Continuing beyond this point would have meant metric pushing, adding unjustified complexity, or masking weak signal with model tuning. 
 
 ## What This Project Demonstrates
 
