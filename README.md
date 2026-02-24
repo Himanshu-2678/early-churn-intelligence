@@ -4,6 +4,9 @@
 
 **Dataset Link:** https://www.kaggle.com/datasets/rivalytics/saas-subscription-and-churn-analytics-dataset
 
+## Architecture Diagram
+![Early_Churn_Architecture](assets/architecture_diagram.png)
+
 I started this project with a clear and standard applied machine learning goal: build a time-aware churn prediction system for a SaaS product using a realistic, multi-table dataset. The intent was not to chase high accuracy or leaderboard-style metrics, but to build the system correctly, in a way that would resemble how churn modeling is done in real production environments.
 
 From the beginning, I enforced the following constraints:
